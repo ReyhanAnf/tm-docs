@@ -1,0 +1,29 @@
+facebook:
+  label: Facebook
+  permalink: /facebook
+  description: Facebook tag description
+
+hello:
+  label: Hello
+  permalink: /hello
+  description: Hello tag description
+
+docusaurus:
+  label: Docusaurus
+  permalink: /docusaurus
+  description: Docusaurus tag description
+
+hola:
+  label: Hola
+  permalink: /hola
+  description: Hola tag description
+
+general:
+  label: General
+  permalink: /general
+  description: General tag description
+
+announcement:
+  label: Announcement
+  permalink: /announcement
+  description: Announcement tag description

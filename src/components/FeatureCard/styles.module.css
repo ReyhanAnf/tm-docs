@@ -1,0 +1,63 @@
+.featureCard {
+  padding: 2rem;
+  text-align: center;
+  border: 2px solid transparent;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.featureCard:hover {
+  border-color: var(--ifm-color-primary);
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(99, 102, 241, 0.2);
+}
+
+.clickable {
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+}
+
+.clickable:hover {
+  text-decoration: none;
+  color: inherit;
+}
+
+.icon {
+  width: 4rem;
+  height: 4rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gradient-primary);
+  border-radius: 1rem;
+  color: white;
+  font-size: 2rem;
+  transition: transform 0.3s ease;
+}
+
+.featureCard:hover .icon {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: var(--ifm-heading-color);
+}
+
+.description {
+  font-size: 1rem;
+  color: var(--ifm-color-gray-700);
+  line-height: 1.6;
+  margin: 0;
+}
+
+[data-theme='dark'] .description {
+  color: var(--ifm-color-gray-400);
+}

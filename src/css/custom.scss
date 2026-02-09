@@ -1,0 +1,551 @@
+/**
+ * Custom Design System for RDocs
+ * Modern, personal documentation theme with unique branding
+ */
+
+/* Import Custom Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+/* ============================================
+   DESIGN TOKENS - Light Mode
+   ============================================ */
+:root {
+  /* Primary Colors – Sky Blue (Main Brand) - More saturated for better contrast */
+  --ifm-color-primary: #0ea5e9;
+  --ifm-color-primary-dark: #0284c7;
+  --ifm-color-primary-darker: #0369a1;
+  --ifm-color-primary-darkest: #075985;
+  --ifm-color-primary-light: #38bdf8;
+  --ifm-color-primary-lighter: #7dd3fc;
+  --ifm-color-primary-lightest: #bae6fd;
+
+  /* Secondary Colors – Vibrant Sky Blue */
+  --ifm-color-secondary: #38bdf8;
+  --ifm-color-secondary-dark: #0ea5e9;
+  --ifm-color-secondary-darker: #0284c7;
+  --ifm-color-secondary-darkest: #0369a1;
+  --ifm-color-secondary-light: #7dd3fc;
+  --ifm-color-secondary-lighter: #bae6fd;
+  --ifm-color-secondary-lightest: #e0f2fe;
+
+  /* Accent Colors – Amber (CTA / Highlight) */
+  --ifm-color-accent: #f59e0b;
+  --ifm-color-accent-dark: #d97706;
+  --ifm-color-accent-darker: #b45309;
+  --ifm-color-accent-darkest: #92400e;
+  --ifm-color-accent-light: #fbbf24;
+  --ifm-color-accent-lighter: #fcd34d;
+  --ifm-color-accent-lightest: #fde68a;
+
+  /* Neutral Colors */
+  --ifm-color-gray-0: #ffffff;
+  --ifm-color-gray-50: #f9fafb;
+  --ifm-color-gray-100: #f3f4f6;
+  --ifm-color-gray-200: #e5e7eb;
+  --ifm-color-gray-300: #d1d5db;
+  --ifm-color-gray-400: #9ca3af;
+  --ifm-color-gray-500: #6b7280;
+  --ifm-color-gray-600: #4b5563;
+  --ifm-color-gray-700: #374151;
+  --ifm-color-gray-800: #1f2937;
+  --ifm-color-gray-900: #111827;
+
+  /* Background Colors - Neutral gray untuk kontras lebih baik */
+  --ifm-background-color: #ffffff;
+  --ifm-background-surface-color: #f8fafc;
+  --ifm-card-background-color: #ffffff;
+
+  /* Typography */
+  --ifm-font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --ifm-font-family-heading: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --ifm-font-family-monospace: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+
+  --ifm-font-size-base: 16px;
+  --ifm-line-height-base: 1.65;
+  --ifm-heading-font-weight: 700;
+
+  /* Spacing */
+  --ifm-spacing-horizontal: 1.5rem;
+  --ifm-spacing-vertical: 1.5rem;
+  --ifm-global-spacing: 1.5rem;
+
+  /* Shadows */
+  --ifm-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --ifm-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --ifm-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --ifm-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --ifm-shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+
+  /* Border Radius */
+  --ifm-border-radius: 0.5rem;
+  --ifm-border-radius-sm: 0.375rem;
+  --ifm-border-radius-lg: 0.75rem;
+  --ifm-border-radius-xl: 1rem;
+
+  /* Transitions */
+  --ifm-transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --ifm-transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --ifm-transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Code Blocks */
+  --ifm-code-font-size: 0.875em;
+  --ifm-code-padding-horizontal: 0.375rem;
+  --ifm-code-padding-vertical: 0.125rem;
+  --ifm-code-border-radius: 0.25rem;
+  --docusaurus-highlighted-code-line-bg: rgba(14, 165, 233, 0.12);
+
+  /* Navbar */
+  --ifm-navbar-height: 4rem;
+  --ifm-navbar-background-color: rgba(255, 255, 255, 0.85);
+  --ifm-navbar-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+
+  /* Sidebar */
+  --ifm-sidebar-width: 300px;
+  --doc-sidebar-width: 300px;
+
+  /* Custom Gradients - Lebih vibrant dengan kontras lebih baik */
+  --gradient-primary: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%);
+  --gradient-secondary: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%);
+  --gradient-accent: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  --gradient-mesh:
+    radial-gradient(at 40% 20%, hsla(199, 95%, 60%, 0.4) 0px, transparent 50%),
+    radial-gradient(at 80% 0%, hsla(210, 90%, 55%, 0.35) 0px, transparent 50%),
+    radial-gradient(at 0% 50%, hsla(190, 85%, 58%, 0.3) 0px, transparent 50%);
+}
+
+
+/* ============================================
+   DESIGN TOKENS - Dark Mode
+   ============================================ */
+[data-theme='dark'] {
+  /* Primary Colors - Brighter for dark mode */
+  --ifm-color-primary: #818cf8;
+  --ifm-color-primary-dark: #6366f1;
+  --ifm-color-primary-darker: #4f46e5;
+  --ifm-color-primary-darkest: #4338ca;
+  --ifm-color-primary-light: #a5b4fc;
+  --ifm-color-primary-lighter: #c7d2fe;
+  --ifm-color-primary-lightest: #e0e7ff;
+
+  /* Secondary Colors */
+  --ifm-color-secondary: #2dd4bf;
+  --ifm-color-secondary-dark: #14b8a6;
+  --ifm-color-secondary-darker: #0d9488;
+  --ifm-color-secondary-darkest: #0f766e;
+  --ifm-color-secondary-light: #5eead4;
+  --ifm-color-secondary-lighter: #99f6e4;
+  --ifm-color-secondary-lightest: #ccfbf1;
+
+  /* Accent Colors */
+  --ifm-color-accent: #fbbf24;
+  --ifm-color-accent-dark: #f59e0b;
+  --ifm-color-accent-darker: #d97706;
+  --ifm-color-accent-darkest: #b45309;
+  --ifm-color-accent-light: #fcd34d;
+  --ifm-color-accent-lighter: #fde68a;
+  --ifm-color-accent-lightest: #fef3c7;
+
+  /* Background Colors */
+  --ifm-background-color: #0f172a;
+  --ifm-background-surface-color: #1e293b;
+  --ifm-card-background-color: #1e293b;
+
+  /* Text Colors */
+  --ifm-font-color-base: #e2e8f0;
+  --ifm-heading-color: #f1f5f9;
+
+  /* Navbar */
+  --ifm-navbar-background-color: rgba(15, 23, 42, 0.8);
+  --ifm-navbar-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
+
+  /* Code Blocks */
+  --docusaurus-highlighted-code-line-bg: rgba(129, 140, 248, 0.15);
+
+  /* Custom Gradients for Dark Mode */
+  --gradient-mesh: radial-gradient(at 40% 20%, hsla(250, 90%, 50%, 0.2) 0px, transparent 50%),
+                   radial-gradient(at 80% 0%, hsla(189, 90%, 50%, 0.2) 0px, transparent 50%),
+                   radial-gradient(at 0% 50%, hsla(340, 90%, 50%, 0.2) 0px, transparent 50%);
+}
+
+/* ============================================
+   GLOBAL STYLES
+   ============================================ */
+
+* {
+  transition: background-color var(--ifm-transition-base),
+              color var(--ifm-transition-base),
+              border-color var(--ifm-transition-base);
+}
+
+body {
+  font-family: var(--ifm-font-family-base);
+  font-size: var(--ifm-font-size-base);
+  line-height: var(--ifm-line-height-base);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--ifm-font-family-heading);
+  font-weight: var(--ifm-heading-font-weight);
+  line-height: 1.25;
+}
+
+code {
+  font-family: var(--ifm-font-family-monospace);
+  font-size: var(--ifm-code-font-size);
+  padding: var(--ifm-code-padding-vertical) var(--ifm-code-padding-horizontal);
+  border-radius: var(--ifm-code-border-radius);
+  background-color: var(--ifm-color-gray-100);
+}
+
+[data-theme='dark'] code {
+  background-color: var(--ifm-color-gray-800);
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+
+/* Glassmorphism Effect */
+.glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+[data-theme='dark'] .glass {
+  background: rgba(30, 41, 59, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Gradient Text */
+.gradient-text {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Gradient Border */
+.gradient-border {
+  position: relative;
+  border-radius: var(--ifm-border-radius);
+}
+
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--ifm-border-radius);
+  padding: 2px;
+  background: var(--gradient-primary);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+}
+
+/* Smooth Hover Effects */
+.hover-lift {
+  transition: transform var(--ifm-transition-base),
+              box-shadow var(--ifm-transition-base);
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--ifm-shadow-lg);
+}
+
+/* Fade In Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.6s ease-out;
+}
+
+/* Pulse Animation */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* ============================================
+   NAVBAR CUSTOMIZATION
+   ============================================ */
+
+.navbar {
+  /* height: var(--ifm-navbar-height); - Removed to prevent cutting off mobile menu */
+  min-height: var(--ifm-navbar-height);
+  background-color: var(--ifm-navbar-background-color);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: var(--ifm-navbar-shadow);
+  transition: all var(--ifm-transition-base);
+}
+
+/* Mobile Sidebar Fix */
+@media screen and (max-width: 996px) {
+  .navbar-sidebar {
+    position: fixed !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: auto !important;
+    width: 80vw !important; /* Default width usually, allows tapping outside */
+    max-width: 300px !important;
+    height: 100vh !important;
+    background-color: var(--ifm-background-color) !important;
+    z-index: 1000 !important; /* Ensure it's very high */
+    box-shadow: var(--ifm-shadow-xl) !important;
+    transform: translate3d(0, 0, 0); /* Force hardware acceleration */
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Ensure the backdrop covers properly */
+  .navbar-sidebar__backdrop {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    right: 0 !important;
+    height: 100vh !important;
+    width: 100vw !important;
+    z-index: 999 !important;
+    background-color: rgba(0, 0, 0, 0.6);
+  }
+
+  /* Reset navbar overflow to visible just in case */
+  .navbar {
+    overflow: visible !important;
+  }
+}
+
+.navbar__title {
+  font-family: var(--ifm-font-family-heading);
+  font-weight: 800;
+  font-size: 1.5rem;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.navbar__item {
+  font-weight: 500;
+  transition: color var(--ifm-transition-fast);
+}
+
+.navbar__link:hover {
+  color: var(--ifm-color-primary);
+}
+
+/* ============================================
+   SIDEBAR CUSTOMIZATION
+   ============================================ */
+
+.theme-doc-sidebar-container {
+  border-right: 1px solid var(--ifm-color-gray-200);
+}
+
+[data-theme='dark'] .theme-doc-sidebar-container {
+  border-right-color: var(--ifm-color-gray-800);
+}
+
+.menu__link {
+  border-radius: var(--ifm-border-radius-sm);
+  transition: all var(--ifm-transition-fast);
+}
+
+.menu__link:hover {
+  background-color: var(--ifm-color-primary-lightest);
+  color: var(--ifm-color-primary-dark);
+}
+
+[data-theme='dark'] .menu__link:hover {
+  background-color: rgba(129, 140, 248, 0.1);
+  color: var(--ifm-color-primary-light);
+}
+
+.menu__link--active {
+  color: var(--ifm-color-primary-dark);
+  font-weight: 600;
+}
+
+.menu__link--active:hover {
+  color: var(--ifm-color-primary-dark);
+}
+
+/* ============================================
+   FOOTER CUSTOMIZATION
+   ============================================ */
+
+.footer {
+  background: linear-gradient(180deg, var(--ifm-background-color) 0%, var(--ifm-background-surface-color) 100%);
+  border-top: 1px solid var(--ifm-color-gray-200);
+}
+
+[data-theme='dark'] .footer {
+  border-top-color: var(--ifm-color-gray-800);
+}
+
+.footer__title {
+  font-family: var(--ifm-font-family-heading);
+  font-weight: 700;
+  color: var(--ifm-color-primary);
+}
+
+/* ============================================
+   BUTTON CUSTOMIZATION
+   ============================================ */
+
+.button {
+  border-radius: var(--ifm-border-radius);
+  font-weight: 600;
+  transition: all var(--ifm-transition-base);
+}
+
+.button--primary {
+  background: var(--gradient-primary);
+  border: none;
+}
+
+.button--primary:hover {
+  background: var(--gradient-primary);
+  transform: translateY(-2px);
+  box-shadow: var(--ifm-shadow-lg);
+}
+
+.button--secondary {
+  background: transparent;
+  border: 2px solid var(--ifm-color-primary);
+  color: var(--ifm-color-primary);
+}
+
+.button--secondary:hover {
+  background: var(--ifm-color-primary-lightest);
+  transform: translateY(-2px);
+}
+
+[data-theme='dark'] .button--secondary:hover {
+  background: rgba(129, 140, 248, 0.1);
+}
+
+/* ============================================
+   CARD STYLES
+   ============================================ */
+
+.card {
+  background: var(--ifm-card-background-color);
+  border-radius: var(--ifm-border-radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--ifm-shadow-md);
+  border: 1px solid var(--ifm-color-gray-200);
+  transition: all var(--ifm-transition-base);
+}
+
+[data-theme='dark'] .card {
+  border-color: var(--ifm-color-gray-800);
+}
+
+.card:hover {
+  box-shadow: var(--ifm-shadow-xl);
+  transform: translateY(-4px);
+}
+
+/* ============================================
+   ADMONITIONS / CALLOUTS
+   ============================================ */
+
+.admonition {
+  border-radius: var(--ifm-border-radius);
+  border-left-width: 4px;
+  box-shadow: var(--ifm-shadow-sm);
+}
+
+.admonition-icon svg {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+/* ============================================
+   CODE BLOCKS
+   ============================================ */
+
+.prism-code {
+  border-radius: var(--ifm-border-radius);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.theme-code-block {
+  box-shadow: var(--ifm-shadow-md);
+  border-radius: var(--ifm-border-radius);
+}
+
+/* ============================================
+   SCROLLBAR CUSTOMIZATION
+   ============================================ */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--ifm-color-gray-100);
+}
+
+[data-theme='dark'] ::-webkit-scrollbar-track {
+  background: var(--ifm-color-gray-900);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--ifm-color-gray-400);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ifm-color-primary);
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+
+@media screen and (max-width: 996px) {
+  :root {
+    --ifm-font-size-base: 15px;
+    --ifm-spacing-horizontal: 1rem;
+    --ifm-spacing-vertical: 1rem;
+  }
+
+  .navbar__title {
+    font-size: 1.25rem;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  :root {
+    --ifm-font-size-base: 14px;
+  }
+}

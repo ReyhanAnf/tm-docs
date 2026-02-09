@@ -1,0 +1,75 @@
+.callout {
+  border-radius: var(--ifm-border-radius);
+  padding: 1.25rem;
+  margin: 1.5rem 0;
+  border-left: 4px solid;
+  background: var(--ifm-card-background-color);
+  box-shadow: var(--ifm-shadow-sm);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.title {
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.content {
+  margin-left: 2.25rem;
+  line-height: 1.6;
+}
+
+.content p:last-child {
+  margin-bottom: 0;
+}
+
+/* Type Variants */
+.info {
+  border-left-color: var(--ifm-color-primary);
+}
+
+.info .icon {
+  color: var(--ifm-color-primary);
+}
+
+.warning {
+  border-left-color: var(--ifm-color-accent);
+}
+
+.warning .icon {
+  color: var(--ifm-color-accent);
+}
+
+.success {
+  border-left-color: var(--ifm-color-secondary);
+}
+
+.success .icon {
+  color: var(--ifm-color-secondary);
+}
+
+.error {
+  border-left-color: #ef4444;
+}
+
+.error .icon {
+  color: #ef4444;
+}
+
+.tip {
+  border-left-color: #8b5cf6;
+}
+
+.tip .icon {
+  color: #8b5cf6;
+}

@@ -1,0 +1,297 @@
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+.spinner {
+  width: 3rem;
+  height: 3rem;
+  border: 3px solid var(--ifm-color-gray-200);
+  border-top-color: var(--ifm-color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.lockContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+  padding: 2rem;
+}
+
+.lockCard {
+  max-width: 500px;
+  width: 100%;
+  padding: 3rem 2rem;
+  background: var(--ifm-card-background-color);
+  border-radius: var(--ifm-border-radius-lg);
+  box-shadow: var(--ifm-shadow-xl);
+  border: 1px solid var(--ifm-color-gray-200);
+  text-align: center;
+  animation: fadeInUp 0.5s ease-out;
+}
+
+[data-theme='dark'] .lockCard {
+  border-color: var(--ifm-color-gray-800);
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.lockIcon {
+  width: 5rem;
+  height: 5rem;
+  margin: 0 auto 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gradient-primary);
+  border-radius: 50%;
+  color: white;
+  font-size: 2.5rem;
+}
+
+.lockTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: var(--ifm-heading-color);
+}
+
+.lockDescription {
+  font-size: 1rem;
+  color: var(--ifm-color-gray-700);
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+[data-theme='dark'] .lockDescription {
+  color: var(--ifm-color-gray-400);
+}
+
+.lockForm {
+  margin-bottom: 1.5rem;
+}
+
+.inputGroup {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.input {
+  width: 100%;
+  padding: 0.875rem 3rem 0.875rem 1rem;
+  font-size: 1rem;
+  border: 2px solid var(--ifm-color-gray-300);
+  border-radius: var(--ifm-border-radius);
+  background: var(--ifm-background-color);
+  color: var(--ifm-font-color-base);
+  transition: all var(--ifm-transition-base);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--ifm-color-primary);
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+[data-theme='dark'] .input {
+  border-color: var(--ifm-color-gray-700);
+}
+
+.toggleButton {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 0.5rem;
+  background: transparent;
+  border: none;
+  color: var(--ifm-color-gray-600);
+  cursor: pointer;
+  font-size: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--ifm-border-radius-sm);
+  transition: all var(--ifm-transition-fast);
+}
+
+.toggleButton:hover {
+  background: var(--ifm-color-gray-100);
+  color: var(--ifm-color-primary);
+}
+
+[data-theme='dark'] .toggleButton:hover {
+  background: var(--ifm-color-gray-800);
+}
+
+.error {
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: var(--ifm-border-radius);
+  color: #dc2626;
+  font-size: 0.875rem;
+  animation: shake 0.4s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  75% { transform: translateX(10px); }
+}
+
+.submitButton {
+  width: 100%;
+  padding: 0.875rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  background: var(--gradient-primary);
+  color: white;
+  border: none;
+  border-radius: var(--ifm-border-radius);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all var(--ifm-transition-base);
+}
+
+.submitButton:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--ifm-shadow-lg);
+}
+
+.submitButton:active {
+  transform: translateY(0);
+}
+
+.buttonIcon {
+  font-size: 1.25rem;
+  vertical-align: middle !important;
+}
+
+.hint {
+  font-size: 0.875rem;
+  color: var(--ifm-color-gray-600);
+  font-style: italic;
+}
+
+[data-theme='dark'] .hint {
+  color: var(--ifm-color-gray-500);
+}
+
+/* Unlocked State */
+.unlockedContainer {
+  position: relative;
+}
+
+.unlockBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.1) 0%, rgba(56, 189, 248, 0.1) 100%);
+  border: 1px solid rgba(14, 165, 233, 0.2);
+  border-radius: var(--ifm-border-radius);
+  margin-bottom: 2rem;
+  animation: slideDown 0.4s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.unlockInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--ifm-color-primary);
+  font-weight: 600;
+}
+
+.unlockIcon {
+  font-size: 1.25rem;
+}
+
+.lockButton {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  background: transparent;
+  color: var(--ifm-color-primary);
+  border: 1px solid var(--ifm-color-primary);
+  border-radius: var(--ifm-border-radius-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all var(--ifm-transition-fast);
+}
+
+.lockButton:hover {
+  background: var(--ifm-color-primary);
+  color: white;
+}
+
+.content {
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Responsive */
+@media screen and (max-width: 768px) {
+  .lockCard {
+    padding: 2rem 1.5rem;
+  }
+
+  .lockTitle {
+    font-size: 1.75rem;
+  }
+
+  .unlockBanner {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+
+  .lockButton {
+    width: 100%;
+    justify-content: center;
+  }
+}
