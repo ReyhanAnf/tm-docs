@@ -13,7 +13,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
-- Workflow documentation for documentation management (`docs/01-getting-started/02-documentation-workflow.md`).
+(#FTMP-679) [at Development]
+- Detail informasi member pada menu `Detail Konsultasi` pada dashboard praktisi.
+- Kolom "Organisasi Klien" pada menu `Report -> Finance -> Partner Assessment Topup & Invoice`.
+
+### Removed
+(#FTMP-679) [at Development]
+- Kolom "PPH" dan "PPH Rate" pada menu `Report -> Finance -> Partner Assessment Topup & Invoice`.
 
 ## [1.0.0] - 2025-02-09
 ### Added

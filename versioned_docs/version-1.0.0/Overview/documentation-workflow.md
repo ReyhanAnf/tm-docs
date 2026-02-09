@@ -31,6 +31,15 @@ Contoh jika versi saat ini adalah `1.7.0`:
 *   **Minor Update** -> `1.8.0` (Fitur baru, patch reset ke 0)
 *   **Major Update** -> `2.0.0` (Perubahan besar, minor & patch reset ke 0)
 
+### Label Pre-release (Opsional)
+
+SemVer mengizinkan penambahan label untuk versi yang belum stabil (Pre-release) menggunakan tanda hubung `-`.
+
+*   **`1.1.0-dev`**: Masih dalam tahap development.
+*   **`1.1.0-staging`** atau **`1.1.0-rc.1`**: Release Candidate (Siap tes di staging/UAT).
+
+**Catatan:** Di workflow Docusaurus kita, folder `docs/` merepresentasikan versi **Pre-release** ini. Kita biasanya baru membuat snapshot versi (menjalankan command versioning) saat statusnya sudah **Stable** (misal `1.1.0`).
+
 ## 3. Diagram Workflow
 
 ```mermaid
@@ -127,13 +136,27 @@ Semua perubahan penting pada proyek ini akan didokumentasikan di halaman ini.
 ```
 
 ### Tips Changelog
-Gunakan format **Keep a Changelog**:
-*   `Added` untuk fitur baru.
-*   `Changed` untuk perubahan di fitur yang sudah ada.
-*   `Deprecated` untuk fitur yang akan dihapus.
-*   `Removed` untuk fitur yang sudah dihapus.
-*   `Fixed` untuk perbaikan bug.
-*   `Security` untuk perbaikan celah keamanan.
+
+1.  **Gunakan Group `[Unreleased]` selama Development**:
+    Hindari mencatat setiap versi development (misal `1.1.0-dev`, `1.1.0-staging`) sebagai satu rilis terpisah agar history tidak kotor. Cukup kumpulkan di bawah label `[Unreleased]`.
+
+2.  **Detailkan Sumber Perubahan (Traceability)**:
+    Agar tidak tertukar antar branch/fitur, sangat disarankan mencantumkan **Nomor Tiket/Issue/PR** atau **Nama Branch** di akhir setiap poin.
+
+    **Contoh:**
+    ```markdown
+    ## [Unreleased]
+    ### Added
+    - Fitur pembayaran QRIS (#123 / feature-payment-qris)
+    - Integrasi API Assessment (branch: dev-assessment-api)
+
+    ### Fixed
+    - Typo di halaman Login (#145)
+    ```
+
+3.  **Saat Rilis Official**:
+    Barulah ubah `[Unreleased]` menjadi nomor versi final (misal **`[1.1.0] - 2024-02-20`**) dan kosongkan kembali bagian `[Unreleased]` untuk pengembangan selanjutnya.
+
 
 ## 6. Checklist Rilis
 
