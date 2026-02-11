@@ -13,101 +13,53 @@ and this project adheres to Semantic Versioning.
 
 ## [Unreleased]
 
+> Status: In Staging (belum rilis produksi)
+
 ### Added
 
-(#TMP-679) [Staging]
-- Penambahan detail informasi klien pada menu `Detail Consultation` di dashboard praktisi.
-- Penambahan kolom **Organisasi Klien** pada menu `Report -> Finance -> Partner Assessment Topup & Invoice`.
-- Method baru untuk pengambilan data DataTable Partner (optimasi query & filter).
-
-(#TMP-675) [Staging]
-- Service Action Class untuk modularisasi Partner Management:
-  - `CreatePartnerAction`
-  - `CreatePartnerAssessmentAction`
-  - `UpdatePartnerAction`
-  - `CreatePartnerOperatorAction`
-  - `UpdatePartnerOperatorAction`
-  - `UpdatePartnerAssessmentReferenceAction`
-  - `DeletePartnerOperatorAction`
-  - `DeletePartnerAssessmentZipAction`
-- Service Action Class untuk modul Transaksi & Keuangan:
-  - `CreateMonthlyTransactionAction`
-  - `CreatePartnerAssessmentTransactionAction`
-  - `UploadProofOfPaymentAction`
-  - `UpdateTransactionStatusAction`
-  - `DeductPartnerQuotaAction`
-- Service Action Class untuk Assessment & Data Retrieval:
-  - `GetPartnerClientAssessmentsAction`
-  - `GetPartnerTransactionsAction`
-- Notifikasi Email baru:
-  - `InvoiceNotification`
-  - `WelcomePartnerNotification`
-  - `WelcomePartnerOperatorNotification`
-  - `PaymentProofUploadedNotification`
-- Validasi terstandarisasi melalui Form Request:
-  - `StorePartnerRequest`
-  - `UpdatePartnerRequest`
-  - `StorePartnerAssessmentRequest`
-  - `UpdatePartnerAssessmentRequest`
-  - `UpdatePartnerQuotaRequest`
-  - `BulkUpdatePartnerRequest`
-  - `UpdatePartnerStatusRequest`
-  - `GetPartnerClientAssessmentsRequest`
-  - `GetPartnerTransactionsRequest`
-  - `UpdatePartnerReferenceCodeRequest`
-- Skema harga spesial Partner Assessment:
-  - Support periode tanggal mulai & akhir
-  - Otomatisasi perubahan harga sesuai rentang waktu
-- Komponen View baru untuk detail partner:
-  - Transaction card
-  - Client assessment card
-  - Modal create/edit
-  - Modal pembayaran/topup
-  - Modal bulk update
-  - Modal change password
-  - Script terpisah untuk halaman partner & partner detail
+- Penambahan informasi detail klien pada menu **Detail Consultation** di dashboard praktisi.
+- Penambahan kolom **Organisasi Klien** pada laporan keuangan Partner Assessment (Topup & Invoice).
+- Peningkatan struktur pengambilan data tabel partner agar lebih terorganisir dan mudah difilter.
+- Modularisasi proses manajemen partner (pembuatan, update, operator, dan referensi asesmen) agar lebih rapi dan terpisah dari controller.
+- Sistem transaksi partner yang lebih terstruktur, termasuk:
+  - Pembuatan transaksi bulanan otomatis.
+  - Proses pembelian kuota asesmen.
+  - Upload dan validasi bukti pembayaran.
+  - Otomatisasi update status transaksi.
+  - Pengurangan kuota saat asesmen digunakan atau diunduh.
+- Penambahan sistem notifikasi email otomatis untuk:
+  - Partner baru.
+  - Operator partner.
+  - Invoice transaksi.
+  - Notifikasi ke admin saat bukti pembayaran diunggah.
+- Dukungan skema harga spesial untuk partner atau event tertentu, dengan periode tanggal mulai dan akhir yang dapat diatur.
+- Penambahan komponen tampilan detail partner agar informasi transaksi dan asesmen klien lebih lengkap dan interaktif.
+- Validasi input yang lebih ketat dan terstandarisasi pada seluruh proses partner, asesmen, dan transaksi.
 
 ---
 
 ### Changed
 
-(#TMP-675) [Staging]
-
-- Refactor total struktur Partner Management menjadi **Thin Controller + Service Layer**.
-- Refactor Bulk Download:
-  - `BulkDownloadCrossPartnerAction`
-  - `BulkDownloadAssessmentPartnerResultAction`
-  - Stabilitas meningkat, mengatasi timeout dan curl error 28.
-- Perubahan status validasi download asesmen:
-  - Tidak lagi bergantung pada timer modul,
-  - Berdasarkan durasi dan status penyelesaian asesmen.
-- Update repository & service layer:
-  - `MasterPartnerRepository`
-  - `PartnerStrengthTypologyRepository`
-  - `ExecutiveServiceImpl` (support multi-bahasa report)
-  - `PartnerServiceImpl`
-- Update UI:
-  - Dropdown bahasa pada tombol download report.
-  - Penyesuaian invoice & topup.
-  - Konsistensi layout profile & sidebar.
-- Peningkatan helper DataTables:
-  - Penambahan default sorting (`?? 'asc'`) untuk mencegah error `Undefined array key "order"`.
+- Refactor struktur backend agar controller lebih ringan dan logika bisnis dipisahkan ke layer yang lebih modular.
+- Peningkatan stabilitas fitur **Bulk Download**, terutama untuk data dalam jumlah besar, sehingga mengurangi risiko timeout.
+- Perubahan mekanisme validasi download asesmen: tidak lagi bergantung pada timer per modul, melainkan pada durasi dan status penyelesaian asesmen.
+- Penyempurnaan tampilan UI pada modul partner, invoice, dan topup agar lebih konsisten.
+- Penyempurnaan sistem DataTables untuk mencegah error saat proses sorting pertama kali dimuat.
+- Dukungan multi-bahasa pada proses download report.
 
 ---
 
 ### Removed
 
-(#TMP-679) [Staging]
-- Kolom **PPH** dan **PPH Rate** pada menu `Report -> Finance -> Partner Assessment Topup & Invoice`.
-
-(#TMP-675) [Staging]
-- Penghapusan logika bisnis kompleks langsung dari Controller Partner dan Controller Lain (dipindahkan ke Service Action Layer).
+- Penghapusan kolom **PPH** dan **PPH Rate** pada laporan Topup & Invoice.
+- Penghapusan logika bisnis kompleks yang sebelumnya langsung berada di dalam controller.
 
 ---
 
 ## [1.0.0] - 2025-02-09
 
 ### Added
+
 - Initial release of Talents Mapping documentation.
 - Architecture blueprints and functional specs.
 - Database schema documentation.
