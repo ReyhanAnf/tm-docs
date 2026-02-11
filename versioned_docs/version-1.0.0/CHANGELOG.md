@@ -21,19 +21,19 @@ and this project adheres to Semantic Versioning.
 - Penambahan kolom **Organisasi Klien** pada laporan keuangan Partner Assessment (Topup & Invoice).
 - Peningkatan struktur pengambilan data tabel partner agar lebih terorganisir dan mudah difilter.
 - Modularisasi proses manajemen partner (pembuatan, update, operator, dan referensi asesmen) agar lebih rapi dan terpisah dari controller.
-- Sistem transaksi partner yang lebih terstruktur, termasuk:
+- Sistem transaksi partner (Backend) (Refactor) (Service Action):
   - Pembuatan transaksi bulanan otomatis.
   - Proses pembelian kuota asesmen.
   - Upload dan validasi bukti pembayaran.
   - Otomatisasi update status transaksi.
   - Pengurangan kuota saat asesmen digunakan atau diunduh.
-- Penambahan sistem notifikasi email otomatis untuk:
+- Penambahan sistem notifikasi email otomatis untuk (Refactor) (Service Action):
   - Partner baru.
   - Operator partner.
   - Invoice transaksi.
   - Notifikasi ke admin saat bukti pembayaran diunggah.
 - Dukungan skema harga spesial untuk partner atau event tertentu, dengan periode tanggal mulai dan akhir yang dapat diatur.
-- Penambahan komponen tampilan detail partner agar informasi transaksi dan asesmen klien lebih lengkap dan interaktif.
+- Penambahan komponen tampilan detail partner agar informasi transaksi dan asesmen klien lebih lengkap.
 - Validasi input yang lebih ketat dan terstandarisasi pada seluruh proses partner, asesmen, dan transaksi.
 
 ---
