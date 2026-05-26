@@ -81,11 +81,11 @@ flowchart TB
 		B4[Upgrade Link & Unlock Add-on]
 	end
 
-	subgraph Client["Client (Guests)"]
+	subgraph Client[Client Guests]
 		C1[Terima Link]
 		C2[Validasi Form]
 		C3[Tes AEC]
-		C4[Upgrade (Hydration)]
+		C4[Upgrade]
 	end
 
 	subgraph Domain
