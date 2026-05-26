@@ -3,9 +3,10 @@ title: 'Partner Requirement Blueprint'
 slug: /talents-mapping/2026-q1-technical-specification-document/partner-requirement-blueprint
 ---
 
-:::info Dokumen Status **Status:** ARCHITECTURAL DESIGN APPROVED | **Versi:** 2.7.0 (Zero-Risk Migration + DBML Schema) | **Tanggal:** 26 Mei 2026
-
-Dokumen ini adalah rencana arsitektur untuk sistem B2B (Business-to-Business) pada platform Talents Mapping. Sistem ini dirancang agar **sejajar dan skalabel** dengan sistem B2C yang sudah ada, menggunakan pola domain yang sama (Entitlement, Commerce, AEC Engine) serta menyelaraskan alur bisnis dengan PRD Enhancement. :::
+> [!NOTE]
+> Dokumen Status **Status:** ARCHITECTURAL DESIGN APPROVED | **Versi:** 2.7.0 (Zero-Risk Migration + DBML Schema) | **Tanggal:** 26 Mei 2026
+> 
+> Dokumen ini adalah rencana arsitektur untuk sistem B2B (Business-to-Business) pada platform Talents Mapping. Sistem ini dirancang agar **sejajar dan skalabel** dengan sistem B2C yang sudah ada, menggunakan pola domain yang sama (Entitlement, Commerce, AEC Engine) serta menyelaraskan alur bisnis dengan PRD Enhancement.
 
 ## Glosarium
 
@@ -30,7 +31,7 @@ Dokumen ini adalah rencana arsitektur untuk sistem B2B (Business-to-Business) pa
 
 Platform Talents Mapping memiliki dua model bisnis:
 
-```
+```mermaid
 graph TD    Platform[Talents Mapping Platform]    B2C["B2C — Retail\n(Member / End User)"]    B2B["B2B — Partner\n(Business Client)"]    Platform --> B2C    Platform --> B2B    B2C --> MemberFlow["Beli Produk → Entitlement → Tes Sendiri → Download Hasil"]    B2B --> PartnerFlow["Partner sebar Link → Klien Tes Gratis → Partner Download Hasil (pakai kuota/tagihan)"]
 ```
 
@@ -58,7 +59,7 @@ graph TD    Platform[Talents Mapping Platform]    B2C["B2C — Retail\n(Member /
 
 ### 2.2. Diagram Blok Sistem B2B
 
-```
+```mermaid
 flowchart TB    subgraph Admin        A1[Konfigurasi Tier]        A2[Feature Flags Matrix]        A3[Setup Produk B2B]    end    subgraph Partner        B1[Visualisasi Quota Pocket]        B2[Tema & Branding Custom]        B3[Referral Link Utama]        B4[Upgrade Link & Unlock Add-on]    end    subgraph Client (Guests)        C1[Terima Link]        C2[Validasi Form]        C3[Tes AEC]        C4[Upgrade (Hydration)]    end    subgraph Domain        D1[Legacy Tables: Transaksi & Kuota]        D2[Guest Directory (CRM)]        D3[AEC Engine & Result Generators]        D4[Partner]    end    Admin --> Partner    Partner --> Client    Client --> Domain    B1 --> D1    C2 --> D2    C3 --> D3    C4 --> D3
 ```
 
@@ -68,7 +69,7 @@ flowchart TB    subgraph Admin        A1[Konfigurasi Tier]        A2[Feature Fla
 
 Meskipun di backend kita menggunakan tabel legacy `partner_quota_downloads`, di bagian UI (_Frontend_) kita menyajikannya sebagai "Keranjang Saldo" (Pocket) agar informatif.
 
-```
+```mermaid
 Dashboard Partner [Identitas Kode: TELKOM] ← STRIKT SATU KODE UTAMA├── Menu: Pengaturan Partner (Branding)│├── Menu: Info Quota Pocket (Summary dari partner_quota_downloads)│   ├── Pocket Legacy / Lama      : 5 Slot   (Sisa need_consume_first)│   ├── Pocket Rp 400.000         : 10 Slot  (Sisa quota dgn price_topup=400k)│   └── Pocket Rp 250.000         : 50 Slot  (Sisa quota dgn price_topup=250k)│├── Menu: TMA Personal│   ├── Referral Link: [domain.com/test/tma-personal-partner?ref=TELKOM](https://domain.com/test/tma-personal-partner?ref=TELKOM)│   └── Daftar Klien Personal│       ├── [Download Laporan Standar]│       └── [Unlock: Executive Summary]│└── Menu: TMA Professional    ├── Referral Link: [domain.com/test/tma-professional-partner?ref=TELKOM](https://domain.com/test/tma-professional-partner?ref=TELKOM)    └── Daftar Klien Professional        ├── [Download Laporan Standar]        └── [Unlock: ST30 Report]
 ```
 
@@ -82,13 +83,13 @@ Sistem meresolusi kode referensi URL (`ref=TELKOM`) dan mengambil `aec_package_i
 
 Backend membaca tabel `partner_quota_downloads` dengan alur validasi yang lebih pintar:
 
-```
+```mermaid
 sequenceDiagram    actor Partner    participant System    participant QuotaDB as partner_quota_downloads    Partner->>System: Klik "Download Laporan Standar" (Harga Terkunci = 250rb)        System->>QuotaDB: STEP 1: Cek apakah ada record dengan need_consume_first > 0    alt need_consume_first > 0        QuotaDB-->>System: Ada (Saldo = 5)        Note right of System: Kurangi need_consume_first (-1)    else Habis        System->>QuotaDB: STEP 2: Cari record (partner_assessment_id = X) AND (price_topup = 250000)        QuotaDB-->>System: Ada (quota = 50)        Note right of System: Kurangi quota (-1)    end        System->>QuotaDB: Catat Penggunaan ke partner_quota_logs    System->>System: Generate URL PDF    System-->>Partner: File PDF Terunduh
 ```
 
 ### 4.3. Alur "Unlock Result" (Laporan Tambahan Berbayar)
 
-```
+```mermaid
 sequenceDiagram    actor Partner    participant System    participant Unlock as Tabel Unlocked Reports    participant Transaksi as partner_transactions    Partner->>System: Klik "Unlock Executive Summary"    System->>Unlock: Cek Hak Akses di partner_session_unlocked_reports        alt Belum Terbuka        System-->>Partner: Tampilkan Paywall (Harga Add-on: Rp 50.000)        Partner->>Transaksi: Checkout Direct Pay (Insert Transaksi Baru)        Transaksi-->>System: Pembayaran Berhasil (Status=Paid)        System->>Unlock: INSERT (session_id, type='executive_summary')    end        System->>System: Trigger AEC Generator Driver (Executive)    System-->>Partner: File PDF Executive Summary Terunduh
 ```
 
@@ -98,7 +99,7 @@ Skema ini mempertahankan kolom-kolom _legacy_ secara lengkap pada `partner_asses
 
 ### 5.1. Visualisasi Entity Relationship Diagram (Mermaid)
 
-```
+```mermaid
 erDiagram    %% Core Entities    guests {        uuid id PK        string email UK        string full_name        string source_type "public | b2b_partner"    }    partners {        uuid id PK        string name        string type "quota | invoice"        json config "Branding (Logo/Theme)"    }    %% MASTER CONFIG (Full Legacy Schema + New Columns)    partner_assessments {        uuid id PK        uuid partner_id FK        uuid assessment_id FK "Legacy assessment ref"        uuid aec_package_id FK "NEW: Relasi absolut B2B Master"        string reference_code "KODE UNIK GLOBAL (e.g. TELKOM)"        int price "Harga Normal"        int special_price "Harga Promo"        int pph        int dpp_special        timestamp start_date_special_price        timestamp end_date_special_price        timestamp injury_time        string status "active | inactive"        string assessment_type "before_payment"        string event_type        string event_type_special        json addon_prices "NEW: Harga dinamis fitur add-on"    }    %% QUOTA MECHANISM (Full Legacy Schema)    partner_quota_downloads {        uuid id PK        uuid partner_assessment_id FK "Relasi ke Master Config"        int quota "Sisa kuota normal"        int price_topup "Harga beli (Pengikat)"        int need_consume_first "Legacy Pocket (Prioritas Utama)"        timestamp created_at        timestamp updated_at    }    %% TRANSAKSI KOMERSIAL (Full Legacy Schema)    partner_transactions {        uuid id PK        uuid partner_id FK        uuid partner_assessment_id FK        uuid transaction_by FK        uuid transaction_by_admin FK        string code UK        string transaction_type "after_payment | direct_addon"        string payment_channel        string payment_url        string proof_of_payment        int quota_downloads        int price        int sub_total        int admin_fee        int dpp        int ppn        int pph_rate        int pph_amount        int total        string status "pending|paid|canceled|expired"        string notify "success|failed"        timestamp paid_at        timestamp expired_at    }    partner_quota_logs {        uuid id PK        uuid partner_quota_download_id FK        uuid partner_client_assessment_id FK        int quota_change "Nilai potong (-1)"    }    %% Execution Subsystem    partner_client_sessions {        uuid id PK        uuid partner_id FK        uuid partner_assessment_id FK         uuid aec_session_id FK        uuid guest_id FK         string status "pending | in_progress | completed"        int price "KUNCI HARGA HISTORIS TES UTAMA"        string upgrade_token    }    %% NEW: SCALABLE ADD-ON UNLOCKS (Micro-Entitlements)    partner_session_unlocked_reports {        uuid id PK        uuid partner_client_session_id FK "Relasi ke sesi utama klien"        string report_type "Nama AEC Driver (e.g., executive_summary, st30)"        int unlock_price "Harga saat ditebus"        timestamp unlocked_at    }    %% Relasi    guests ||--o{ partner_client_sessions : "mengerjakan"    partners ||--o{ partner_assessments : "memiliki config"    partners ||--o{ partner_quota_downloads : "memiliki Kuota"    partners ||--o{ partner_transactions : "riwayat pembelian"    partner_assessments ||--o{ partner_transactions : "referensi pembelian"    partner_assessments ||--o{ partner_client_sessions : "konfigurasi referensi & sesi"    partner_assessments ||--o{ partner_quota_downloads : "referensi kuota"    partner_quota_downloads ||--o{ partner_quota_logs : "mencatat pemotongan"    partner_client_sessions ||--o{ partner_quota_logs : "ditarik report-nya"    partner_client_sessions ||--o{ partner_session_unlocked_reports : "membuka akses"
 ```
 
@@ -136,7 +137,7 @@ Daftar fitur mutlak didaftarkan secara statis di `config/partner.php`. Tabel `pa
 
 ### 7.1. Definisi Konfigurasi (Code as Source of Truth)
 
-```
+```mermaid
 // config/partner.phpreturn [    'features' => [        // 1. FITUR MUTLAK (CORE)        'postpaid_billing' => [            'label' => 'Tagihan Pasca-Bayar (Invoice)',            'type'  => 'core',            'condition' => fn($partner) => $partner->type === 'invoice',        ],        'cross_partner_claim' => [            'label' => 'Tarik Klien Eksternal',            'type'  => 'core',            'condition' => fn($partner) => true,        ],        // 2. FITUR TAMBAHAN (ADD-ON)        'custom_branding' => [            'label' => 'Kustomisasi Tema & Logo',            'type'  => 'addon',            'default' => false,        ],    ]];
 ```
 
