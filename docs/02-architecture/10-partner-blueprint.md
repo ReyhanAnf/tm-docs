@@ -636,8 +636,8 @@ Table aec_sessions {
 Table partner_assessments {
   id char(36) [pk]
   partner_id char(36) [ref: > users.id]
-  assessment_id char(36) [note: 'Legacy assessment ref (assessments table)']
-  aec_package_id char(36) [ref: > aec_packages.id, note: 'NEW: Relasi absolut ke AEC Engine']
+  assessment_id char(36) [note: 'LEGACY — Relasi ke tabel assessments (engine lama). TIDAK dihapus untuk menjaga histori ribuan data klien lama. NULL untuk record baru.']
+  aec_package_id char(36) [ref: > aec_packages.id, note: 'NEW (Source of Truth) — Relasi ke AEC Engine. Wajib diisi untuk semua config partner baru. Backfill untuk record lama via assessment_to_aec_package_map.']
   reference_code varchar(191) [note: 'Kode unik global e.g. TELKOM — TMA & ST30 cascade bersama']
   price int [default: 0, note: 'Harga Normal']
   special_price int [note: 'Harga Promo']
@@ -766,11 +766,273 @@ Langkah migrasi:
 | Tabel `partner_client_assessments` | ✅ Sudah Ada | Live (TMA legacy) |
 | Tabel `partner_quota_downloads`, `partner_transactions`, `partner_assessments` | ✅ Sudah Ada | Legacy tables, tetap dipakai |
 | Schema Alteration `partner_assessments` (+ `aec_package_id`, `addon_prices`) | 🔴 Belum | Kolom belum ada di migration |
+| Backfill `assessment_id` → `aec_package_id` di `partner_assessments` | 🔴 Belum | Bergantung pada Schema Alteration selesai, lihat BAB 6.5 |
 | Tabel `partner_client_sessions` (baru) | 🔴 Belum | Perlu dibuat via migration baru |
 | Tabel `partner_session_unlocked_reports` (baru) | 🔴 Belum | Perlu dibuat via migration baru |
 | Tabel `partner_configs` | 🔴 Belum | Perlu dibuat (sekarang config ada di `partner_profile` atau tidak ada) |
 | Konsolidasi `executive_transactions` → `partner_transactions` | 🔴 Belum | `ExecutiveService` masih aktif |
 | Backfill `guests` dari `partner_client_assessments` | 🔴 Belum | Bergantung pada tabel baru |
+
+### 6.5. Transisi `assessment_id` → `aec_package_id` (Dual-Column Strategy)
+
+> [!IMPORTANT]
+> **Konteks Masalah:** Kolom `partner_assessments.assessment_id` merujuk ke tabel `assessment` (engine lama berbasis `QuestionGroup`). Kolom ini akan digantikan oleh `aec_package_id` yang merujuk ke `aec_packages` (AEC Engine baru). Namun, ribuan record `partner_client_assessments` sudah terhubung ke `partner_assessments` yang menggunakan `assessment_id`. Data ini **tidak boleh dihapus** — ia adalah histori finansial dan asesmen klien yang sahih.
+
+#### Prinsip Utama: Dual-Column Coexistence
+
+Kedua kolom **hidup berdampingan secara permanen** di tabel `partner_assessments`:
+
+| Kolom | Status | Peran |
+|-------|--------|-------|
+| `assessment_id` | **LEGACY — Tetap Ada** | Referensi ke engine lama. Diisi pada record lama. Tidak boleh diubah/dihapus. |
+| `aec_package_id` | **NEW — Source of Truth** | Referensi ke AEC Engine baru. Wajib diisi untuk semua config partner baru. |
+
+#### Fase 1 — Schema Alteration & Backfill Mapping
+
+```mermaid
+flowchart TD
+    A["Schema Alteration:<br/>ALTER TABLE partner_assessments<br/>ADD COLUMN aec_package_id char(36) NULL"]
+    A --> B["Buat tabel bantu sementara:<br/>assessment_to_aec_package_map<br/>(assessment_id -> aec_package_id)"]
+    B --> C["Admin/Developer isi mapping manual<br/>sesuai jenis tes (TMA Personal, TMA Pro, ST30)"]
+    C --> D["Jalankan Backfill Script:<br/>UPDATE partner_assessments<br/>SET aec_package_id = map.aec_package_id<br/>WHERE assessment_id = map.assessment_id"]
+    D --> E["Validasi: semua partner_assessments<br/>kini memiliki aec_package_id"]
+```
+
+**Contoh tabel mapping sementara:**
+
+```sql
+-- Tabel bantu untuk proses backfill (bisa di-drop setelah selesai)
+CREATE TABLE assessment_to_aec_package_map (
+    assessment_id  CHAR(36) PRIMARY KEY,
+    aec_package_id CHAR(36) NOT NULL,
+    assessment_type VARCHAR(50), -- 'tma' | 'st30'
+    notes TEXT
+);
+
+-- Contoh data mapping
+INSERT INTO assessment_to_aec_package_map VALUES
+    ('uuid-lama-tma-personal', 'uuid-aec-tma-personal', 'tma', 'TMA Personal Package'),
+    ('uuid-lama-tma-pro',      'uuid-aec-tma-pro',      'tma', 'TMA Professional Package'),
+    ('uuid-lama-st30',         'uuid-aec-st30',          'st30', 'ST30 Strength Typology');
+
+-- Script backfill
+UPDATE partner_assessments pa
+JOIN assessment_to_aec_package_map m ON pa.assessment_id = m.assessment_id
+SET pa.aec_package_id = m.aec_package_id
+WHERE pa.aec_package_id IS NULL;
+```
+
+#### Fase 2 — Routing Logic di Aplikasi
+
+Selama masa transisi, aplikasi menggunakan **routing logic** agar tidak ada yang terputus:
+
+```php
+// Di PartnerAssessment model atau Service — helper untuk resolve engine yang dipakai
+public function getAecPackageAttribute(): ?AecPackage
+{
+    // NEW: Prioritaskan aec_package_id jika sudah diisi
+    if ($this->aec_package_id) {
+        return AecPackage::find($this->aec_package_id);
+    }
+
+    // LEGACY FALLBACK: Gunakan assessment_id untuk record lama
+    // Ini hanya untuk backward compatibility — tidak untuk flow baru
+    return null; // atau resolve dari assessment lama jika diperlukan
+}
+
+// Saat membuat partner_client_sessions BARU:
+// Wajib: partner_assessment HARUS sudah punya aec_package_id
+// Tolak jika aec_package_id masih null
+public function createClientSession(PartnerAssessment $pa, Guest $guest): PartnerClientSession
+{
+    if (!$pa->aec_package_id) {
+        throw new \RuntimeException(
+            "PartnerAssessment [{$pa->id}] belum memiliki aec_package_id. "
+            . "Backfill harus selesai sebelum membuat sesi baru."
+        );
+    }
+    // ... buat sesi
+}
+```
+
+#### Fase 3 — Data Lama: Baca Tanpa Ubah
+
+Untuk menampilkan histori klien lama (dari `partner_client_assessments` yang terhubung via `assessment_id`), sistem membaca data apa adanya **tanpa mengubah struktur relasi lama**. Data historis hanya perlu ditampilkan, bukan diproses ulang melalui AEC Engine.
+
+```mermaid
+flowchart LR
+    subgraph Baru["Sesi Baru (Setelah Migrasi)"]
+        PA_new["partner_assessments<br/>aec_package_id: ✅ Filled"] --> PCS["partner_client_sessions"]
+        PCS --> AS["aec_sessions"]
+        AS --> G["guests"]
+    end
+
+    subgraph Lama["Sesi Lama (Histori — Read Only)"]
+        PA_old["partner_assessments<br/>assessment_id: ✅ Filled<br/>aec_package_id: ✅ Backfilled"] --> PCA["partner_client_assessments (legacy)"]
+        PA_old --> PCST["partner_client_strength_typologies (legacy)"]
+    end
+
+    style Lama fill:#f5f5f5,stroke:#ccc
+```
+
+#### Aturan Bersih untuk Data Baru
+
+| Kondisi | Aturan |
+|---------|--------|
+| Membuat `partner_assessments` baru | `aec_package_id` **wajib diisi**, `assessment_id` boleh null |
+| Membuat `partner_client_sessions` baru | Hanya diperbolehkan jika `partner_assessments.aec_package_id` sudah terisi |
+| Membaca data histori lama | Gunakan `partner_client_assessments` / `partner_client_strength_typologies` apa adanya |
+| Kolom `assessment_id` | **Tidak pernah diubah atau dihapus** — ia adalah kunci integritas histori |
+
+### 6.6. In-Flight Safety — Keamanan Data Selama Masa Transisi
+
+> [!CAUTION]
+> **Skenario Kritis:** Pada awal migrasi, ada dua kondisi yang harus dijamin aman sepenuhnya:
+> 1. **Tes In-Progress (Belum Selesai):** Klien yang sedang mengerjakan tes di sistem lama (`partner_client_assessments`) tetapi belum submit jawaban.
+> 2. **Tes Selesai, Belum Didownload:** Klien sudah selesai tes di sistem lama, hasilnya ada, tapi partner belum sempat mendownload. Download tetap harus bisa dilakukan dari UI baru.
+>
+> Kedua skenario ini **100% aman selama kita tidak menyentuh tabel legacy**. Prinsip utama: sistem baru hanya *menambah* layer, tidak *menggantikan* layer lama di hari yang sama.
+
+#### Peta Skenario In-Flight
+
+```mermaid
+flowchart TD
+    subgraph Day0["Hari 0: Sebelum Migrasi (Sistem Lama Saja)"]
+        OldFlow["Klien tes -> partner_client_assessments\nPartner download -> DownloadAssessmentPartnerResultAction\n(baca dari partner_client_assessments)"]
+    end
+
+    subgraph DayX["Hari X: Selama Masa Transisi (Hybrid)"]
+        direction TB
+        OldInFlight["Tes LAMA yang belum selesai\natau belum didownload"] -->|"tetap pakai"| LegacyPath
+        NewFlow["Tes BARU (setelah backfill selesai)"] -->|"pakai"| NewPath
+
+        LegacyPath["Legacy Path:\npartner_client_assessments\n+ DownloadAssessmentPartnerResultAction\n(tidak berubah)"]
+        NewPath["New Path:\npartner_client_sessions + aec_sessions\n+ guest CRM"]
+    end
+
+    subgraph DayY["Hari Y: Setelah Migrasi Penuh"]
+        FullNew["Semua tes baru via New Path\nLegacy tables: Read-Only histori"]
+    end
+
+    Day0 --> DayX --> DayY
+```
+
+#### Jaminan Safety per Skenario
+
+##### Skenario 1: Tes In-Progress (Klien Sedang Mengerjakan)
+
+Data klien yang sedang mengerjakan tes di sistem lama ada di `partner_client_assessments` dengan kondisi:
+- `assessment_start_at` diisi
+- `assessment_end_at` masih NULL
+- `result_download_link` masih NULL
+
+**Apa yang terjadi saat deploy sistem baru?**
+
+Tidak ada yang berubah. Route pengerjaan tes lama (`/test/partner?ref=...`) masih dilayani oleh `PartnerAssessmentController` yang membaca dari `partner_client_assessments`. Klien yang sedang di tengah tes **tidak akan merasakan perubahan apapun**.
+
+```
+INVARIANT: Selama route /test/partner/* tidak diubah,
+           semua tes in-progress aman 100%.
+```
+
+##### Skenario 2: Tes Selesai, Belum Didownload
+
+Data klien dengan kondisi:
+- `assessment_end_at` diisi ✅
+- `timer_in_seconds` > 0 ✅
+- `result_download_at` masih NULL (belum didownload)
+
+**Bagaimana download tetap berjalan?**
+
+`DownloadAssessmentPartnerResultAction` yang ada sekarang sudah menangani ini dengan baik. Dari analisis kode aktual:
+
+```php
+// DownloadAssessmentPartnerResultAction::execute()
+// Sistem mengecek result_download_link, bukan asal tabel data
+if ($clientAssessment->content_result && !$clientAssessment->result_download_link) {
+    $this->generateResultFromApi($clientAssessment, $ppn); // Generate dulu jika perlu
+}
+
+// Baru setelah itu cek apakah bisa didownload
+if (!$clientAssessment->result_download_link || !$clientAssessment->timer_in_seconds) {
+    return ['status' => false, 'message' => 'Hasil asesment belum bisa di download.'];
+}
+```
+
+Artinya: selama `partner_client_assessments` tidak disentuh, **semua data yang belum didownload tetap bisa didownload** via alur yang sudah ada.
+
+##### Skenario 3: Quota Deduction untuk Tes Lama
+
+Saat partner mendownload tes lama (dari sistem lama), `DeductPartnerQuotaAction` bekerja berdasarkan:
+- `clientAssessment.price` — harga yang dikunci saat klien mulai tes
+- `partner_quota_downloads.price_topup` — bucket kuota yang harus cocok
+
+Ini **tidak bergantung pada** `aec_package_id` sama sekali. Pemotongan kuota tetap berjalan normal untuk data lama.
+
+```php
+// DeductPartnerQuotaAction — membaca dari clientAssessment.price
+// Tidak ada dependency ke aec_package_id
+$priceForQuota = $clientAssessment->price;
+$partnerQuotaDownload = $partnerAssessment->quotaDownloads()
+    ->where('price_topup', $priceForQuota)
+    ->first();
+```
+
+#### Checklist Keamanan Wajib Sebelum Deploy
+
+| # | Pemeriksaan | Cara Verifikasi |
+|---|-------------|-----------------|
+| ✅ | Tabel `partner_client_assessments` tidak di-truncate/drop | Cek migration file baru, pastikan tidak ada `drop table` |
+| ✅ | Route lama `/test/partner/*` masih aktif | `php artisan route:list \| grep partner.assessment` |
+| ✅ | `DownloadAssessmentPartnerResultAction` tidak diubah tanpa backward compat | Code review diff sebelum deploy |
+| ✅ | `DeductPartnerQuotaAction` tidak diubah | Code review diff sebelum deploy |
+| ✅ | Kolom `assessment_id` di `partner_assessments` tidak di-drop | Cek migration baru — hanya `ADD COLUMN`, bukan `DROP COLUMN` |
+| ✅ | `partner_quota_downloads` tidak diubah strukturnya | Cek migration file |
+| ✅ | Tidak ada force-redirect dari halaman tes lama ke halaman baru | Test manual di staging dengan session tes in-progress |
+
+#### Strategi Monitoring Pasca-Deploy
+
+Pantau log berikut di hari-hari pertama setelah deploy untuk mendeteksi masalah lebih awal:
+
+```php
+// Log yang perlu dimonitor:
+// 1. Download failure rate
+Log::warning('[DownloadAssessmentPartnerResultAction] Quota check failed', [...]);
+
+// 2. Tes yang tidak bisa ditemukan
+return ['status' => false, 'message' => 'Opps! Asesment tidak ditemukan.'];
+
+// 3. Kuota tidak ditemukan (bisa indikasi data migrasi salah)
+return ['status' => false, 'message' => 'Opps! Tidak memiliki kuota yang sesuai.'];
+```
+
+**Threshold alert yang disarankan:**
+- Download failure rate > 1% dalam 1 jam → investigasi segera
+- Kuota-not-found error > 5 kejadian dalam 10 menit → kemungkinan ada masalah backfill
+
+#### Urutan Deploy yang Aman (Recommended)
+
+```mermaid
+flowchart TD
+    S1["1. Jalankan migration:\nADD COLUMN aec_package_id (nullable)\nADD COLUMN addon_prices (nullable)\n-- TIDAK ada DROP COLUMN --"] 
+    S2["2. Jalankan backfill script:\nisi aec_package_id dari mapping table\n-- Verifikasi 100% records terisi --"]
+    S3["3. Deploy kode baru\n-- Sistem lama masih berjalan penuh --\n-- Sistem baru aktif untuk flow baru --"]
+    S4["4. Monitor 24-48 jam\nPantau log download failure\nPantau tes in-progress"]
+    S5["5. Jika semua aman:\nBuat migration partner_client_sessions\nBuat migration partner_session_unlocked_reports"]
+    S6["6. Secara bertahap arahkan\ntes BARU ke path baru\nTes lama tetap jalan di path lama"]
+
+    S1 --> S2 --> S3 --> S4 --> S5 --> S6
+
+    style S1 fill:#e8f5e9
+    style S2 fill:#e8f5e9
+    style S3 fill:#fff3e0
+    style S4 fill:#fff3e0
+    style S5 fill:#e3f2fd
+    style S6 fill:#e3f2fd
+```
+
+> [!TIP]
+> **Golden Rule:** Jika ada keraguan tentang keamanan data tes lama, tunda deploy langkah selanjutnya. Ribuan data klien dan kepercayaan partner jauh lebih berharga daripada kecepatan migrasi. Sistem lama yang berjalan berdampingan dengan sistem baru adalah kondisi yang **normal dan aman** selama masa transisi.
 
 ## BAB 7: Feature Flag Matrix (Core vs Add-on)
 
